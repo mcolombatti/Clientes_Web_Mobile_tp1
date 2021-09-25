@@ -1,0 +1,144 @@
+# npm
+npm es el administrador de dependencias oficial de Node.js.
+Un administrador de dependencias es un programa que nos permite:
+1. Instalar "paquetes" (tipo "scripts" o bibliotecas o frameworks) a través de la línea de comandos que
+existan en el repositorio oficial de npm.
+2. El que exista ese repo oficial también ayuda a la búsqueda de paquetes.
+3. Además de instalar el paquete, se encarga de resolver e instalar todas las dependencias que ese paquete
+tenga, con las correspondientes versiones que se necesita, así como las dependencias de las dependencias.
+
+Este mecanismo de resolver las dependencias de manera recursiva habilita a que podamos trabajar con paquetes
+y scripts de una manera más "atómica".
+Es decir, npm adopta la filosofía de Unix, entre otros, de priorizar tener muchos archivos/paquetes/funciones,
+que hagan cosas específicas.
+
+Todas las funcionalidades de npm las accedemos a través de su CLI (Command-Line Interface).
+
+Lo primero que requerimos con npm es "inicializar" un paquete/proyecto:
+
+    npm init
+
+Nota: El proyecto se inicializa en la carpeta donde ejecuten ese comando.
+
+El comando "init" crea el archivo "package.json". Este archivo es el centro de todo el funcionamiento de
+npm.
+
+Nota: Si quieren inicializar el paquete con todos los valores defaults y editarlos luego en el archivo, pueden
+agregar al comando el flag "-y" o "--yes".
+
+
+Teniendo eso, somos libres de empezar a instalar paquetes.
+
+Particularmente, nos interesa empezar a hablar de...
+
+# webpack
+webpack nos permite a nosotros trabajar nuestros archivos de cualquier manera que nos sea conveniente,
+por ejemplo, separando nuestro código en cientos de archivos, incluyendo JSs, CSSs, imágenes, o lo que sea,
+y generar un "empaquetado" (bundle), o más, a partir de todo eso.
+Ese bundle puede optimizarse de múltiples maneras: minificando el código, con "tree-shaking", aplicando
+transformaciones como pre/post-procesadores (ej: SASS, PostCSS, TypeScript, etc), entre otras cosas.
+
+Para lograrlo, webpack crea un "árbol/gráfico de dependencias" ("dependency graph") a partir de un archivo de
+inicio ("entry point").
+Desde ese archivo, analiza "estáticamente" el código para detectar qué cosas son necesarias.
+
+Hay un cierto glosario de elementos que necesitamos tener presentes a la hora de usar webpack:
+- entry
+    Son los archivos de "inicio" de la aplicación, de donde se generan el árbol de dependencias.
+    Por defecto, usa el archivo "src/index.js".
+- output
+    Es el directorio de salida de los bundles y assets generados.
+    Por defecto, usa el directorio "dist/".
+- loader
+    Son scripts que transforman archivos no-JS a código que webpack pueda usar. webpack solo entiende JS.
+- plugin
+    Son scripts que agregan funcionalidades a webpack que no un loader no alcanza a cubrir.
+- mode
+    webpack trabaja con una suerte de "perfiles" llamados "modos". Esos modos permiten configurar cómo
+    webpack debe generar los bundles. Los que nos interesan son "development" y "production".
+
+# Instalando webpack
+webpack es un paquete de npm, así que lo vamos a instalar junto a su CLI con el comando:
+
+    npm install webpack webpack-cli --save-dev
+
+"npm install" instala un nuevo paquete.
+"webpack webpack-cli" son los dos paquetes que estamos instalando.
+"--save-dev" indica que lo instale como una dependencia de desarrollo. Es decir, en un entorno de producción
+    estos paquetes no son necesarios.
+
+# Probando webpack
+Primero creamos un archivo simple de prueba en "src/index.js".
+
+Luego, creamos los "scripts" de npm para ejecutar webpack.
+Los "scripts" son comandos de consola que definimos en el package.json para ejecutarlos a través de npm.
+Tienen el beneficio de que pueden acceder directamente a cualquiera de los paquetes de npm.
+
+Los scripts se ejecutan con:
+
+    npm run <comando>
+
+# Generando los archivos de HTML con webpack (el index)
+En nuestro primer ejemplo, creamos el bundle, que generó el archivo "dist/main.js".
+Para poder ejecutar el archivo, creamos un "index.html" en "dist" de incluimos el "main.js".
+
+Pero eso no suena muy práctico.
+Sobretodo, si llega a suceder que ciertos aspectos del HTML deben generarse dinámicamente en base a
+configuraciones u valores de webpack.
+
+Generalmente, optamos por hacer que webpack también genere el HTML, al menos el "index.html", como parte
+de su proceso de "bundling".
+
+Para lograr esto, usamos un plugin llamado html-webpack-plugin.
+
+Lo instalamos con el comando:
+
+    npm install html-webpack-plugin --save-dev
+
+Luego, aclaramos en el archivo de configuración de webpack que queremos que use ese plugin.
+
+# ¿Archivo de configuración de webpack? ¿WTF?
+¿No lo mencioné?
+webpack como bundler se basa en un archivo de configuración para definir lo que debe hacer.
+
+Este archivo se crea junto al package.json con el nombre de "webpack.config.js".
+
+# Definiendo el template de HTML
+El plugin de html-webpack-plugin permite definir un template de base para generar un HTML.
+
+Nota: Pueden crear múltiples HTMLs incluyendo varias instancias del plugin.
+
+Estos templates tienen acceso a la sintaxis de templates de "lodash", que nos permiten intercalar
+valores o estructuras como condicionales o bucles, muy al estilo de php.
+
+Usa la sintaxis de:
+
+    <% ...código %>
+
+    Ej:
+
+    <% if(...) { %>
+    ... html para agregar si la condición se cumple.
+    <% } %>
+
+Además, tiene acceso a variables definidas en el entorno de webpack y el propio plugin.
+Por ejemplo, podemos imprimirlas con el tag de impresión:
+
+    <%= ...valor %>
+
+    Ej:
+
+    <%= htmlWebpackPlugin.options.title %>
+
+
+# Dev Server de webpack
+Entre sus muchos plugins y chiches, webpack tiene un servidor de desarrollo oficial, que incluye algunas
+bondades como Hot Module Replacement o Live Reloading.
+
+Primero, necesitamos instalarlo. Nunca van a adivinar como.
+
+Ejecutamos:
+
+    npm install webpack-dev-server --save-dev
+
+Con eso instalado, podemos crear otro "script" del package.json que corra el server.
